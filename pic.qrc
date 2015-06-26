@@ -1,9 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>apple.png</file>
-        <file>apple_pick.png</file>
         <file>banana.png</file>
-        <file>banana_pick.png</file>
         <file>bomb_apple.png</file>
         <file>bomb_apple_pick.png</file>
         <file>bomb_banana.png</file>
@@ -50,6 +48,13 @@
         <file>vertical_watermelon_pick.png</file>
         <file>watermelon.png</file>
         <file>watermelon_pick.png</file>
-        <file>start.png</file>
+        <file>start.jpg</file>
+        <file>warning.jpg</file>
+        <file>warning.mp3</file>
+        <file>chocolate.png</file>
+        <file>back.jpg</file>
+        <file>base.png</file>
+        <file>apple_pick.png</file>
+        <file>banana_pick.png</file>
     </qresource>
 </RCC>

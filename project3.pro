@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui\
+            multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,9 +14,23 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    object.cpp \
+    apple.cpp \
+    banana.cpp \
+    orange.cpp \
+    watermelon.cpp \
+    grape.cpp \
+    empty.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    object.h \
+    apple.h \
+    banana.h \
+    orange.h \
+    watermelon.h \
+    grape.h \
+    empty.h
 
 RESOURCES += \
     pic.qrc
