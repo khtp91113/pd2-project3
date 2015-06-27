@@ -10,8 +10,8 @@ class orange:public object
 public:
     orange(QWidget *parent);
     ~orange();
-    virtual void paint(int type);
- //   virtual bool *operator==(const object*)const;
+    virtual void paint();
+
 };
 #endif // ORANGE
 

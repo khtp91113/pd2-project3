@@ -2,22 +2,20 @@
 
 watermelon::watermelon(QWidget *parent):object(parent)
 {
-    set_v(4);
+    type=4;
 }
 watermelon::~watermelon()
 {
 
 }
 
-void watermelon::paint(int type)
+void watermelon::paint()
 {
-    if(type==0)
-    {
-        label->setPixmap(QPixmap(":/watermelon.png"));
-        label->setScaledContents(true);
-        button->setFlat(true);
-        button->setStyleSheet("background:transparent");
-        button->raise();
-    }
+    label->setPixmap(QPixmap(":/watermelon.png"));
+    label->setScaledContents(true);
+    button->setFlat(true);
+    button->setStyleSheet("background:transparent");
+    button->raise();
 }
+
 

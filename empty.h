@@ -11,7 +11,7 @@ class empty:public object
 public:
     empty(QWidget *parent);
     ~empty();
-    virtual void paint(int type);
+    virtual void paint();
 };
 #endif // EMPTY
 

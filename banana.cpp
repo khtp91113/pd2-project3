@@ -2,22 +2,19 @@
 
 banana::banana(QWidget *parent):object(parent)
 {
-    set_v(1);
+    type=1;
 }
 banana::~banana()
 {
 
 }
 
-void banana::paint(int type)
+void banana::paint()
 {
-    if(type==0)
-    {
-        label->setPixmap(QPixmap(":/banana.png"));
-        label->setScaledContents(true);
-        button->setFlat(true);
-        button->setStyleSheet("background:transparent");
-        button->raise();
-    }
+    label->setPixmap(QPixmap(":/banana.png"));
+    label->setScaledContents(true);
+    button->setFlat(true);
+    button->setStyleSheet("background:transparent");
+    button->raise();
 }
 

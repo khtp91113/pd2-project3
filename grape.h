@@ -10,8 +10,8 @@ class grape:public object
 public:
     grape(QWidget *parent);
     ~grape();
-    virtual void paint(int type);
-   // virtual bool *operator==(const object*)const;
+    virtual void paint();
+
 };
 #endif // GRAPE
 

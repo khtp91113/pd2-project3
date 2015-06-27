@@ -8,7 +8,7 @@ empty::~empty()
 
 }
 
-void empty::paint(int type)
+void empty::paint()
 {
     label->setPixmap(QPixmap(":/base.png"));
     label->setScaledContents(true);

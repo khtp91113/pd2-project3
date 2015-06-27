@@ -10,8 +10,8 @@ class banana:public object
 public:
     banana(QWidget *parent);
     ~banana();
-    virtual void paint(int type);
-   // virtual bool *operator==(const object*)const;
+    virtual void paint();
+
 };
 #endif // BANANA
 

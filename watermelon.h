@@ -10,8 +10,8 @@ class watermelon:public object
 public:
     watermelon(QWidget *parent);
     ~watermelon();
-    virtual void paint(int type);
- //   virtual bool *operator==(const object*)const;
+    virtual void paint();
+
 };
 #endif // WATERMELON
 

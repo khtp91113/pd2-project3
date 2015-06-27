@@ -12,13 +12,12 @@ class object:public QWidget
 public:
     object(QWidget *parent=0);
     ~object();
-    virtual void paint(int type)=0;
+    virtual void paint()=0;
     QLabel *label;
     QPushButton *button;
     QWidget *w;
-    void set_v(int a);
     bool operator==(const object&)const;
-    int v;
+    int type,click;
 };
 
 
