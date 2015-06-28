@@ -1280,13 +1280,21 @@ void MainWindow::bomb_eliminate(int p,int loop)
                 continue;
         if(p%10==9)
             if(i==p-9||i==p+1||i==p+11)
+            {
+                if(i==p+1)
+                    i+=7;
                 continue;
+            }
         if(p/10==9)
             if(i==p+9||i==p+10||i==p+11)
                 continue;
         if(p/10==0)
             if(i==p-11||i==p-10||i==p-9)
+            {
+                if(i==p-9)
+                    i+=7;
                 continue;
+            }
         delete obj[i];
         switch_build(i,-1);
         build(i,0);
@@ -1314,7 +1322,6 @@ void MainWindow::bomb_eliminate(int p,int loop)
         if(i==p-9||i==p+1)
             i+=7;
     }
-
     if(loop==0)
         random_generate();
     for(int i=0;i<100;i++)
