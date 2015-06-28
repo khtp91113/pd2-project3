@@ -1622,7 +1622,6 @@ void MainWindow::time_out()
     comment->setParent(end_game);
     comment->setGeometry(50,200,420,200);
     comment->setFont(f);
-    while(obj[0]->button->isEnabled());
     end_game->show();
 }
 
@@ -1632,6 +1631,8 @@ void MainWindow::restart_game()
     for(int i=0;i<100;i++)
         obj[i]->label->setPixmap(QPixmap(":/base.png"));
     your_score=0;
+    score=0;
+    star=0;
     Count_score->display(QString::number(your_score));
     generate_first_board();
     time_limit=120;
