@@ -71,7 +71,7 @@ void MainWindow::game()
         obj[i]=new empty(w);
     set_place();
     for(int i=0;i<100;i++)
-        obj[i]->paint();
+        obj[i]->paint(0);
     QLabel *base[100];
     for(int i=0;i<100;i++)
     {
@@ -98,6 +98,13 @@ void MainWindow::game()
     Score->setGeometry(250,25,200,70);
     Score->setText("<h2><font color=red><center>Score</center></font></h2>");
     Score->setFont(f);
+    Count_down=new QLCDNumber;
+    Count_down->setParent(w);
+    Count_down->setGeometry(170,25,120,70);
+    Count_score=new QLCDNumber;
+    Count_score->setParent(w);
+    Count_score->setGeometry(420,25,120,70);
+
     this->setCentralWidget(w);
     game_start();
 }
@@ -123,11 +130,11 @@ void MainWindow::generate_first_board()
 {
    srand(time(NULL));
    int board[100];
-   int board_1[100]={0,3,2,0,1,4,0,1,2,1,
-                     4,2,1,2,3,2,3,1,3,3,
-                     4,1,4,4,0,3,3,4,0,3,
+   int board_1[100]={0,1,0,3,0,4,0,1,2,1,
+                     1,2,1,2,3,2,3,1,3,3,
+                     3,1,4,4,0,3,3,4,0,3,
                      0,4,4,2,1,3,4,2,1,4,
-                     1,1,2,0,1,4,2,0,1,0,
+                     2,1,2,0,1,4,2,0,1,0,
                      0,3,2,1,4,3,3,1,0,0,
                      1,0,0,2,0,2,2,3,2,1,
                      3,4,2,0,2,0,0,2,0,2,
@@ -290,7 +297,7 @@ void MainWindow::generate_first_board()
    }
    for(int i=0;i<100;i++)
    {
-       obj[i]->paint();
+       obj[i]->paint(0);
        obj[i]->label->show();
    }
    set_place();
@@ -383,6 +390,7 @@ void MainWindow::generate_first_board()
 void MainWindow::game_start()
 {
     generate_first_board();
+    your_score=0;
     signal=new QSignalMapper(this);
     for(int i=0;i<100;i++)
     {
@@ -390,224 +398,137 @@ void MainWindow::game_start()
         signal->setMapping(obj[i]->button,i);
     }
     connect(signal,SIGNAL(mapped(int)),this,SLOT(button_click(int)));
+    time_limit=120;
+    timer=new QTimer(this);
+    connect(timer,SIGNAL(timeout()),this,SLOT(count_time()));
+    timer->start(1000);
+
+}
+
+void MainWindow::build(int i,int paint_type)
+{
+    obj[i]->label->show();
+    obj[i]->button->show();
+    obj[i]->paint(paint_type);
+    value[0][i]=obj[i]->type;
+    connect(obj[i]->button,SIGNAL(clicked()),signal,SLOT(map()));
+    signal->setMapping(obj[i]->button,i);
+    set_place();
+}
+
+void MainWindow::count_time()
+{
+    Count_down->display(QString::number(time_limit));
+    if(time_limit==0)
+    {
+        timer->stop();
+        time_out();
+    }
+    time_limit--;
+}
+
+void MainWindow::switch_build(int i,int value_change)
+{
+    switch(value_change)
+    {
+    case -1:
+        obj[i]=new empty(w);
+        break;
+    case 0:
+        obj[i]=new apple(w);
+        break;
+    case 1:
+        obj[i]=new banana(w);
+        break;
+    case 2:
+        obj[i]=new grape(w);
+        break;
+    case 3:
+        obj[i]=new orange(w);
+        break;
+    case 4:
+        obj[i]=new watermelon(w);
+        break;
+    case 10:
+        obj[i]=new apple_horizon(w);
+        break;
+    case 11:
+        obj[i]=new banana_horizon(w);
+        break;
+    case 12:
+        obj[i]=new grape_horizon(w);
+        break;
+    case 13:
+        obj[i]=new orange_horizon(w);
+        break;
+    case 14:
+        obj[i]=new watermelon_horizon(w);
+        break;
+    case 20:
+        obj[i]=new apple_vertical(w);
+        break;
+    case 21:
+        obj[i]=new banana_vertical(w);
+        break;
+    case 22:
+        obj[i]=new grape_vertical(w);
+        break;
+    case 23:
+        obj[i]=new orange_vertical(w);
+        break;
+    case 24:
+        obj[i]=new watermelon_vertical(w);
+        break;
+    case 30:
+        obj[i]=new apple_bomb(w);
+        break;
+    case 31:
+        obj[i]=new banana_bomb(w);
+        break;
+    case 32:
+        obj[i]=new grape_bomb(w);
+        break;
+    case 33:
+        obj[i]=new orange_bomb(w);
+        break;
+    case 34:
+        obj[i]=new watermelon_bomb(w);
+        break;
+    case 40:
+        obj[i]=new apple_star(w);
+        break;
+    case 41:
+        obj[i]=new banana_star(w);
+        break;
+    case 42:
+        obj[i]=new grape_star(w);
+        break;
+    case 43:
+        obj[i]=new orange_star(w);
+        break;
+    case 44:
+        obj[i]=new watermelon_star(w);
+        break;
+    }
 }
 
 void MainWindow::judge(int p1,int p2)
 {
     int effort=0;
-
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(false);
     if(*obj[p1]==*obj[p2])
-    {
+    {        
+        delete obj[p2];
+        int temp=value[0][p2];
+        switch_build(p2,value[0][p1]);
+        build(p2,0);
+        delete obj[p1];
+        switch_build(p1,temp);
+        build(p1,0);
         QPropertyAnimation *animation_2,*animation_3;
         animation_2=new QPropertyAnimation(obj[p1]->label,"geometry");
         animation_3=new QPropertyAnimation(obj[p2]->label,"geometry");
-        switch(value[0][p1])
-        {
-        case 0:
-            obj[p2]->label->setPixmap(QPixmap(":/apple.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 1:
-            obj[p2]->label->setPixmap(QPixmap(":/banana.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 2:
-            obj[p2]->label->setPixmap(QPixmap(":/grape.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 3:
-            obj[p2]->label->setPixmap(QPixmap(":/orange.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 4:
-            obj[p2]->label->setPixmap(QPixmap(":/watermelon.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 10:
-            obj[p2]->label->setPixmap(QPixmap(":/horizon_apple.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 11:
-            obj[p2]->label->setPixmap(QPixmap(":/horizon_banana.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 12:
-            obj[p2]->label->setPixmap(QPixmap(":/horizon_grape.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 13:
-            obj[p2]->label->setPixmap(QPixmap(":/horizon_orange.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 14:
-            obj[p2]->label->setPixmap(QPixmap(":/horizon_watermelon.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 20:
-            obj[p2]->label->setPixmap(QPixmap(":/vertical_apple.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 21:
-            obj[p2]->label->setPixmap(QPixmap(":/vertical_banana.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 22:
-            obj[p2]->label->setPixmap(QPixmap(":/vertical_grape.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 23:
-            obj[p2]->label->setPixmap(QPixmap(":/vertical_orange.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 24:
-            obj[p2]->label->setPixmap(QPixmap(":/vertical_watermelon.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 30:
-            obj[p2]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 31:
-            obj[p2]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 32:
-            obj[p2]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 33:
-            obj[p2]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 34:
-            obj[p2]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 40:
-            obj[p2]->label->setPixmap(QPixmap(":/star_apple.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 41:
-            obj[p2]->label->setPixmap(QPixmap(":/star_banana.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 42:
-            obj[p2]->label->setPixmap(QPixmap(":/star_grape.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 43:
-            obj[p2]->label->setPixmap(QPixmap(":/star_orange.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        case 44:
-            obj[p2]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-            obj[p2]->label->setScaledContents(true);
-            break;
-        }
-        switch(value[0][p2])
-        {
-
-        case 0:
-            obj[p1]->label->setPixmap(QPixmap(":/apple.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 1:
-            obj[p1]->label->setPixmap(QPixmap(":/banana.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 2:
-            obj[p1]->label->setPixmap(QPixmap(":/grape.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 3:
-            obj[p1]->label->setPixmap(QPixmap(":/orange.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 4:
-            obj[p1]->label->setPixmap(QPixmap(":/watermelon.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 10:
-            obj[p1]->label->setPixmap(QPixmap(":/horizon_apple.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 11:
-            obj[p1]->label->setPixmap(QPixmap(":/horizon_banana.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 12:
-            obj[p1]->label->setPixmap(QPixmap(":/horizon_grape.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 13:
-            obj[p1]->label->setPixmap(QPixmap(":/horizon_orange.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 14:
-            obj[p1]->label->setPixmap(QPixmap(":/horizon_watermelon.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 20:
-            obj[p1]->label->setPixmap(QPixmap(":/vertical_apple.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 21:
-            obj[p1]->label->setPixmap(QPixmap(":/vertical_banana.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 22:
-            obj[p1]->label->setPixmap(QPixmap(":/vertical_grape.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 23:
-            obj[p1]->label->setPixmap(QPixmap(":/vertical_orange.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 24:
-            obj[p1]->label->setPixmap(QPixmap(":/vertical_watermelon.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 30:
-            obj[p1]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 31:
-            obj[p1]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 32:
-            obj[p1]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 33:
-            obj[p1]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 34:
-            obj[p1]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 40:
-            obj[p1]->label->setPixmap(QPixmap(":/star_apple.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 41:
-            obj[p1]->label->setPixmap(QPixmap(":/star_banana.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 42:
-            obj[p1]->label->setPixmap(QPixmap(":/star_grape.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 43:
-            obj[p1]->label->setPixmap(QPixmap(":/star_orange.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        case 44:
-            obj[p1]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-            obj[p1]->label->setScaledContents(true);
-            break;
-        }
         animation_2->setDuration(500);
         animation_2->setStartValue(QRect(20+p2%10*52,570-p2/10*52,50,50));
         animation_2->setEndValue(QRect(20+p1%10*52,570-p1/10*52,50,50));
@@ -619,25 +540,34 @@ void MainWindow::judge(int p1,int p2)
         group1->addAnimation(animation_3);
         group1->start();
         elapse(500);
+        for(int i=0;i<100;i++)
+            obj[i]->button->setEnabled(true);
+        return;
     }
     if(value[0][p1]/10==4)
     {
-        obj[p1]->label->setPixmap(QPixmap(":/base.png"));
-        obj[p1]->label->setScaledContents(true);
-        obj[p1]->type=-1;
-        value[0][p1]=-1;
+        delete obj[p1];
+        switch_build(p1,-1);
+        build(p1,0);
+        your_score+=10;
+        Count_score->display(QString::number(your_score));
         star_eliminate(p2,0);
     }
     if(value[0][p2]/10==4)
     {
-        obj[p2]->label->setPixmap(QPixmap(":/base.png"));
-        obj[p2]->label->setScaledContents(true);
-        value[0][p2]=-1;
-        obj[p2]->type=-1;
+        delete obj[p2];
+        switch_build(p2,-1);
+        build(p2,0);
+        your_score+=10;
+        Count_score->display(QString::number(your_score));
         star_eliminate(p1,0);
     }
+    int count=0;
     while(effort==0)
     {
+        for(int i=0;i<100;i++)
+            obj[i]->button->setEnabled(false);
+        count++;
         effort=1;
         //星星(橫)
         for(int i=0;i<100;i++)
@@ -646,55 +576,30 @@ void MainWindow::judge(int p1,int p2)
             {
                 int temp[5]={value[0][i],value[0][i+1],value[0][i+2],value[0][i+3],value[0][i+4]};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+1]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+1]=-1;
-                obj[i+1]->type=-1;
+                delete obj[i+1];
+                switch_build(i+1,-1);
+                build(i+1,0);
                 elapse(50);
-                obj[i+2]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+2]=-1;
-                obj[i+2]->type=-1;
+                delete obj[i+2];
+                switch_build(i+2,-1);
+                build(i+2,0);
                 elapse(50);
-                obj[i+3]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+3]=-1;
-                obj[i+3]->type=-1;
+                delete obj[i+3];
+                switch_build(i+3,-1);
+                build(i+3,0);
                 elapse(50);
-                obj[i+4]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+4]=-1;
-                obj[i+4]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/star_apple.png"));
-                    value[0][i]=40;
-                    obj[i]->type=40;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/star_banana.png"));
-                    value[0][i]=41;
-                    obj[i]->type=41;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/star_grape.png"));
-                    value[0][i]=42;
-                    obj[i]->type=42;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/star_orange.png"));
-                    value[0][i]=43;
-                    obj[i]->type=43;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-                    value[0][i]=44;
-                    obj[i]->type=44;
-                    break;
-                }
-                set_place();
-
+                delete obj[i+4];
+                switch_build(i+4,-1);
+                build(i+4,0);
+                your_score+=50;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+40);
+                build(i,0);
                 for(int j=0;j<=4;j++)//檢查消掉的有沒有特殊形
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -728,55 +633,30 @@ void MainWindow::judge(int p1,int p2)
             {
                 int temp[5]={value[0][i],value[0][i+10],value[0][i+20],value[0][i+30],value[0][i+40]};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+10]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+10]=-1;
-                obj[i+10]->type=-1;
+                delete obj[i+10];
+                switch_build(i+10,-1);
+                build(i+10,0);
                 elapse(50);
-                obj[i+20]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+20]=-1;
-                obj[i+20]->type=-1;
+                delete obj[i+20];
+                switch_build(i+20,-1);
+                build(i+20,0);
                 elapse(50);
-                obj[i+30]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+30]=-1;
-                obj[i+30]->type=-1;
+                delete obj[i+30];
+                switch_build(i+30,-1);
+                build(i+30,0);
                 elapse(50);
-                obj[i+40]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+40]=-1;
-                obj[i+40]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/star_apple.png"));
-                    value[0][i]=40;
-                    obj[i]->type=40;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/star_banana.png"));
-                    value[0][i]=41;
-                    obj[i]->type=41;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/star_grape.png"));
-                    value[0][i]=42;
-                    obj[i]->type=42;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/star_orange.png"));
-                    value[0][i]=43;
-                    obj[i]->type=43;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-                    value[0][i]=44;
-                    obj[i]->type=44;
-                    break;
-                }
-                set_place();
-
+                delete obj[i+40];
+                switch_build(i+40,-1);
+                build(i+40,0);
+                your_score+=50;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+40);
+                build(i,0);
                 for(int j=0;j<=4;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -798,7 +678,7 @@ void MainWindow::judge(int p1,int p2)
                         }
                     }
                 }
-                  random_generate();
+                random_generate();
             }
         }
         //bomb
@@ -810,55 +690,30 @@ void MainWindow::judge(int p1,int p2)
                 int temp[5]={value[0][i],value[0][i+1],value[0][i+2],value[0][i+10],value[0][i+20]};
                 int place[5]={i,i+1,i+2,i+10,i+20};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+1]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+1]=-1;
-                obj[i+1]->type=-1;
+                delete obj[i+1];
+                switch_build(i+1,-1);
+                build(i+1,0);
                 elapse(50);
-                obj[i+2]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+2]=-1;
-                obj[i+2]->type=-1;
+                delete obj[i+2];
+                switch_build(i+2,-1);
+                build(i+2,0);
                 elapse(50);
-                obj[i+10]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+10]=-1;
-                obj[i+10]->type=-1;
+                delete obj[i+10];
+                switch_build(i+10,-1);
+                build(i+10,0);
                 elapse(50);
-                obj[i+20]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+20]=-1;
-                obj[i+20]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-                    value[0][i]=30;
-                    obj[i]->type=30;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-                    value[0][i]=31;
-                    obj[i]->type=31;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-                    value[0][i]=32;
-                    obj[i]->type=32;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-                    value[0][i]=33;
-                    obj[i]->type=33;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-                    value[0][i]=34;
-                    obj[i]->type=34;
-                    break;
-                }
-                set_place();
-
+                delete obj[i+20];
+                switch_build(i+20,-1);
+                build(i+20,0);
+                your_score+=50;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+30);
+                build(i,0);
                 for(int j=0;j<=4;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -880,7 +735,6 @@ void MainWindow::judge(int p1,int p2)
                         }
                      }
                 }
-                random_generate();
             }
             if(i%10==7)
                 i+=2;
@@ -893,54 +747,30 @@ void MainWindow::judge(int p1,int p2)
                 int temp[5]={value[0][i],value[0][i+10],value[0][i+20],value[0][i+21],value[0][i+22]};
                 int place[5]={i,i+10,i+20,i+21,i+22};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+10]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+10]=-1;
-                obj[i+10]->type=-1;
+                delete obj[i+10];
+                switch_build(i+10,-1);
+                build(i+10,0);
                 elapse(50);
-                obj[i+20]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+20]=-1;
-                obj[i+20]->type=-1;
+                delete obj[i+20];
+                switch_build(i+20,-1);
+                build(i+20,0);
                 elapse(50);
-                obj[i+21]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+21]=-1;
-                obj[i+21]->type=-1;
+                delete obj[i+21];
+                switch_build(i+21,-1);
+                build(i+21,0);
                 elapse(50);
-                obj[i+22]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+22]=-1;
-                obj[i+21]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-                    value[0][i]=30;
-                    obj[i]->type=30;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-                    value[0][i]=31;
-                    obj[i]->type=31;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-                    value[0][i]=32;
-                    obj[i]->type=32;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-                    value[0][i]=33;
-                    obj[i]->type=33;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-                    value[0][i]=34;
-                    obj[i]->type=34;
-                    break;
-                }
-                set_place();
+                delete obj[i+22];
+                switch_build(i+22,-1);
+                build(i+22,0);
+                your_score+=50;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+30);
+                build(i,0);
                 for(int j=0;j<=4;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -962,7 +792,6 @@ void MainWindow::judge(int p1,int p2)
                         }
                     }
                 }
-                random_generate();
             }
             if(i%10==7)
                 i+=2;
@@ -975,54 +804,30 @@ void MainWindow::judge(int p1,int p2)
                 int temp[5]={value[0][i],value[0][i+1],value[0][i+2],value[0][i+12],value[0][i+22]};
                 int place[5]={i,i+1,i+2,i+12,i+22};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+1]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+1]=-1;
-                obj[i+1]->type=-1;
+                delete obj[i+1];
+                switch_build(i+1,-1);
+                build(i+1,0);
                 elapse(50);
-                obj[i+2]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+2]=-1;
-                obj[i+2]->type=-1;
+                delete obj[i+2];
+                switch_build(i+2,-1);
+                build(i+2,0);
                 elapse(50);
-                obj[i+12]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+12]=-1;
-                obj[i+12]->type=-1;
+                delete obj[i+12];
+                switch_build(i+12,-1);
+                build(i+12,0);
                 elapse(50);
-                obj[i+22]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+22]=-1;
-                obj[i+22]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-                    value[0][i]=30;
-                    obj[i]->type=30;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-                    value[0][i]=31;
-                    obj[i]->type=31;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-                    value[0][i]=32;
-                    obj[i]->type=32;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-                    value[0][i]=33;
-                    obj[i]->type=33;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-                    value[0][i]=34;
-                    obj[i]->type=34;
-                    break;
-                }
-                set_place();
+                delete obj[i+22];
+                switch_build(i+22,-1);
+                build(i+22,0);
+                your_score+=50;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+30);
+                build(i,0);
                 for(int j=0;j<=4;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -1044,7 +849,6 @@ void MainWindow::judge(int p1,int p2)
                         }
                     }
                 }
-                random_generate();
             }
             if(i%10==7)
                 i+=2;
@@ -1057,54 +861,30 @@ void MainWindow::judge(int p1,int p2)
                 int temp[5]={value[0][i],value[0][i+10],value[0][i+20],value[0][i+19],value[0][i+18]};
                 int place[5]={i,i+10,i+20,i+19,i+18};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+10]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+10]=-1;
-                obj[i+10]->type=-1;
+                delete obj[i+10];
+                switch_build(i+10,-1);
+                build(i+10,0);
                 elapse(50);
-                obj[i+20]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+20]=-1;
-                obj[i+20]->type=-1;
+                delete obj[i+20];
+                switch_build(i+20,-1);
+                build(i+20,0);
                 elapse(50);
-                obj[i+19]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+19]=-1;
-                obj[i+19]->type=-1;
+                delete obj[i+19];
+                switch_build(i+19,-1);
+                build(i+19,0);
                 elapse(50);
-                obj[i+18]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+18]=-1;
-                obj[i+18]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-                    value[0][i]=30;
-                    obj[i]->type=30;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-                    value[0][i]=31;
-                    obj[i]->type=31;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-                    value[0][i]=32;
-                    obj[i]->type=32;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-                    value[0][i]=33;
-                    obj[i]->type=33;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-                    value[0][i]=34;
-                    obj[i]->type=34;
-                    break;
-                }
-                set_place();
+                delete obj[i+18];
+                switch_build(i+18,-1);
+                build(i+18,0);
+                your_score+=50;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+30);
+                build(i,0);
                 for(int j=0;j<=4;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -1126,7 +906,6 @@ void MainWindow::judge(int p1,int p2)
                         }
                     }
                 }
-                random_generate();
             }
             if(i%10==9)
                 i+=2;
@@ -1138,50 +917,26 @@ void MainWindow::judge(int p1,int p2)
             {
                 int temp[4]={value[0][i],value[0][i+10],value[0][i+20],value[0][i+30]};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+10]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+10]=-1;
-                obj[i+10]->type=-1;
+                delete obj[i+10];
+                switch_build(i+10,-1);
+                build(i+10,0);
                 elapse(50);
-                obj[i+20]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+20]=-1;
-                obj[i+20]->type=-1;
+                delete obj[i+20];
+                switch_build(i+20,-1);
+                build(i+20,0);
                 elapse(50);
-                obj[i+30]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+30]=-1;
-                obj[i+30]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/vertical_apple.png"));
-                    value[0][i]=20;
-                    obj[i]->type=20;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/vertical_banana.png"));
-                    value[0][i]=21;
-                    obj[i]->type=21;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/vertical_grape.png"));
-                    value[0][i]=22;
-                    obj[i]->type=22;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/vertical_orange.png"));
-                    value[0][i]=23;
-                    obj[i]->type=23;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/vertical_watermelon.png"));
-                    value[0][i]=24;
-                    obj[i]->type=24;
-                    break;
-                }
-                set_place();
+                delete obj[i+30];
+                switch_build(i+30,-1);
+                build(i+30,0);
+                your_score+=40;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+20);
+                build(i,0);
                 for(int j=0;j<4;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -1203,7 +958,6 @@ void MainWindow::judge(int p1,int p2)
                         }
                     }
                 }
-                random_generate();
             }
         }
         //橫
@@ -1213,50 +967,26 @@ void MainWindow::judge(int p1,int p2)
             {
                 int temp[4]={value[0][i],value[0][i+1],value[0][i+2],value[0][i+3]};
                 effort=0;
-                obj[i]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i]=-1;
-                obj[i]->type=-1;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
                 elapse(50);
-                obj[i+1]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+1]=-1;
-                obj[i+1]->type=-1;
+                delete obj[i+1];
+                switch_build(i+1,-1);
+                build(i+1,0);
                 elapse(50);
-                obj[i+2]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+2]=-1;
-                obj[i+2]->type=-1;
+                delete obj[i+2];
+                switch_build(i+2,-1);
+                build(i+2,0);
                 elapse(50);
-                obj[i+3]->label->setPixmap(QPixmap(":/base.png"));
-                value[0][i+3]=-1;
-                obj[i+3]->type=-1;
-                switch(temp[0]%10)
-                {
-                case 0:
-                    obj[i]->label->setPixmap(QPixmap(":/horizon_apple.png"));
-                    value[0][i]=10;
-                    obj[i]->type=10;
-                    break;
-                case 1:
-                    obj[i]->label->setPixmap(QPixmap(":/horizon_banana.png"));
-                    value[0][i]=11;
-                    obj[i]->type=11;
-                    break;
-                case 2:
-                    obj[i]->label->setPixmap(QPixmap(":/horizon_grape.png"));
-                    value[0][i]=12;
-                    obj[i]->type=12;
-                    break;
-                case 3:
-                    obj[i]->label->setPixmap(QPixmap(":/horizon_orange.png"));
-                    value[0][i]=13;
-                    obj[i]->type=13;
-                    break;
-                case 4:
-                    obj[i]->label->setPixmap(QPixmap(":/horizon_watermelon.png"));
-                    value[0][i]=14;
-                    obj[i]->type=14;
-                    break;
-                }
-                set_place();
+                delete obj[i+3];
+                switch_build(i+3,-1);
+                build(i+3,0);
+                your_score+=40;
+                Count_score->display(QString::number(your_score));
+                delete obj[i];
+                switch_build(i,temp[0]%10+10);
+                build(i,0);
                 for(int j=0;j<=3;j++)
                 {
                     if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
@@ -1278,10 +1008,129 @@ void MainWindow::judge(int p1,int p2)
                         }
                     }
                 }
-                random_generate();
             }
             if(i%10==6)
                 i+=3;
+        }
+        //一般三個
+        //橫
+        for(int i=0;i<98;i++)
+        {
+            if(value[0][i]%10==value[0][i+1]%10&&value[0][i+1]%10==value[0][i+2]%10)
+            {
+                int temp[3]={value[0][i],value[0][i+1],value[0][i+2]};
+                effort=0;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
+                elapse(50);
+                delete obj[i+1];
+                switch_build(i+1,-1);
+                build(i+1,-1);
+                elapse(50);
+                delete obj[i+2];
+                switch_build(i+2,-1);
+                build(i+2,0);
+                your_score+=30;
+                Count_score->display(QString::number(your_score));
+                for(int j=0;j<=2;j++)
+                {
+                    if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
+                    {
+                        switch(temp[j]/10)
+                        {
+                        case 1:
+                            horizon_eliminate(i+j,0);
+                            break;
+                        case 2:
+                            vertical_eliminate(i+j,0);
+                            break;
+                        case 3:
+                            bomb_eliminate(i+j,0);
+                            break;
+                        case 4:
+                            star_eliminate(i+j,0);
+                            break;
+                        }
+                    }
+                }
+            }
+            if(i%10==7)
+                i+=2;
+        }
+        //直
+        for(int i=0;i<80;i++)
+        {
+            if(value[0][i]%10==value[0][i+10]%10&&value[0][i+10]%10==value[0][i+20]%10)
+            {
+                int temp[3]={value[0][i],value[0][i+10],value[0][i+20]};
+                effort=0;
+                delete obj[i];
+                switch_build(i,-1);
+                build(i,0);
+                elapse(50);
+                delete obj[i+10];
+                switch_build(i+10,-1);
+                build(i+10,0);
+                elapse(50);
+                delete obj[i+20];
+                switch_build(i+20,-1);
+                build(i+20,0);
+                your_score+=30;
+                Count_score->display(QString::number(your_score));
+                for(int j=0;j<=2;j++)
+                {
+                    if(temp[j]/10==1||temp[j]/10==2||temp[j]/10==3||temp[j]/10==4)
+                    {
+                        switch(temp[j]/10)
+                        {
+                        case 1:
+                            horizon_eliminate(i+10*j,0);
+                            break;
+                        case 2:
+                            vertical_eliminate(i+10*j,0);
+                            break;
+                        case 3:
+                            bomb_eliminate(i+10*j,0);
+                            break;
+                        case 4:
+                            star_eliminate(i+10*j,0);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        random_generate();
+        for(int i=0;i<100;i++)
+            obj[i]->button->setEnabled(true);
+        if(effort==1&&count==1)
+        {
+            for(int i=0;i<100;i++)
+                obj[i]->button->setEnabled(false);
+            int temp=value[0][p2];
+            delete obj[p2];
+            switch_build(p2,value[0][p1]);
+            build(p2,0);
+            delete obj[p1];
+            switch_build(p1,temp);
+            build(p1,0);
+            QPropertyAnimation *animation_4,*animation_5;
+            animation_4=new QPropertyAnimation(obj[p1]->label,"geometry");
+            animation_5=new QPropertyAnimation(obj[p2]->label,"geometry");
+            animation_4->setDuration(500);
+            animation_4->setStartValue(QRect(20+p2%10*52,570-p2/10*52,50,50));
+            animation_4->setEndValue(QRect(20+p1%10*52,570-p1/10*52,50,50));
+            animation_5->setDuration(500);
+            animation_5->setStartValue(QRect(20+p1%10*52,570-p1/10*52,50,50));
+            animation_5->setEndValue(QRect(20+p2%10*52,570-p2/10*52,50,50));
+            QParallelAnimationGroup *group1=new QParallelAnimationGroup;
+            group1->addAnimation(animation_4);
+            group1->addAnimation(animation_5);
+            group1->start();
+            elapse(500);
+            for(int i=0;i<100;i++)
+                obj[i]->button->setEnabled(true);
         }
     }
 }
@@ -1297,217 +1146,17 @@ void MainWindow::button_click(int p)
         }
     if(click==0)//沒有選過的
     {
-        switch(value[0][p])
-        {
-        case 0:
-            obj[p]->label->setPixmap(QPixmap(":/apple_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 1:
-            obj[p]->label->setPixmap(QPixmap(":/banana_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 2:
-            obj[p]->label->setPixmap(QPixmap(":/grape_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 3:
-            obj[p]->label->setPixmap(QPixmap(":/orange_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 4:
-            obj[p]->label->setPixmap(QPixmap(":/watermelon_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 10:
-            obj[p]->label->setPixmap(QPixmap(":/horizon_apple_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 11:
-            obj[p]->label->setPixmap(QPixmap(":/horizon_banana_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 12:
-            obj[p]->label->setPixmap(QPixmap(":/horizon_grape_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 13:
-            obj[p]->label->setPixmap(QPixmap(":/horizon_orange_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 14:
-            obj[p]->label->setPixmap(QPixmap(":/horizon_watermelon_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 20:
-            obj[p]->label->setPixmap(QPixmap(":/vertical_apple_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 21:
-            obj[p]->label->setPixmap(QPixmap(":/vertical_banana_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 22:
-            obj[p]->label->setPixmap(QPixmap(":/vertical_grape_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 23:
-            obj[p]->label->setPixmap(QPixmap(":/vertical_orange_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 24:
-            obj[p]->label->setPixmap(QPixmap(":/vertical_watermelon_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 30:
-            obj[p]->label->setPixmap(QPixmap(":/bomb_apple_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 31:
-            obj[p]->label->setPixmap(QPixmap(":/bomb_banana_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 32:
-            obj[p]->label->setPixmap(QPixmap(":/bomb_grape_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 33:
-            obj[p]->label->setPixmap(QPixmap(":/bomb_orange_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 34:
-            obj[p]->label->setPixmap(QPixmap(":/bomb_watermelon_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 40:
-            obj[p]->label->setPixmap(QPixmap(":/star_apple_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 41:
-            obj[p]->label->setPixmap(QPixmap(":/star_banana_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 42:
-            obj[p]->label->setPixmap(QPixmap(":/star_grape_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 43:
-            obj[p]->label->setPixmap(QPixmap(":/star_orange_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        case 44:
-            obj[p]->label->setPixmap(QPixmap(":/star_watermelon_pick.png"));
-            obj[p]->label->setScaledContents(true);
-            break;
-        }
+        delete obj[p];
+        switch_build(p,value[0][p]);
+        build(p,1);
         value[1][p]=1;
     }
     else//有已被選取
     {
         value[1][i]=0;
-        switch(value[0][i])//先把已被選取的還原
-        {
-        case 0:
-            obj[i]->label->setPixmap(QPixmap(":/apple.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 1:
-            obj[i]->label->setPixmap(QPixmap(":/banana.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 2:
-            obj[i]->label->setPixmap(QPixmap(":/grape.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 3:
-            obj[i]->label->setPixmap(QPixmap(":/orange.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 4:
-            obj[i]->label->setPixmap(QPixmap(":/watermelon.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 10:
-            obj[i]->label->setPixmap(QPixmap(":/horizon_apple.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 11:
-            obj[i]->label->setPixmap(QPixmap(":/horizon_banana.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 12:
-            obj[i]->label->setPixmap(QPixmap(":/horizon_grape.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 13:
-            obj[i]->label->setPixmap(QPixmap(":/horizon_orange.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 14:
-            obj[i]->label->setPixmap(QPixmap(":/horizon_watermelon.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 20:
-            obj[i]->label->setPixmap(QPixmap(":/vertical_apple.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 21:
-            obj[i]->label->setPixmap(QPixmap(":/vertical_banana.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 22:
-            obj[i]->label->setPixmap(QPixmap(":/vertical_grape.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 23:
-            obj[i]->label->setPixmap(QPixmap(":/vertical_orange.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 24:
-            obj[i]->label->setPixmap(QPixmap(":/vertical_watermelon.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 30:
-            obj[i]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 31:
-            obj[i]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 32:
-            obj[i]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 33:
-            obj[i]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 34:
-            obj[i]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 40:
-            obj[i]->label->setPixmap(QPixmap(":/star_apple.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 41:
-            obj[i]->label->setPixmap(QPixmap(":/star_banana.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 42:
-            obj[i]->label->setPixmap(QPixmap(":/star_grape.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 43:
-            obj[i]->label->setPixmap(QPixmap(":/star_orange.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        case 44:
-            obj[i]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-            obj[i]->label->setScaledContents(true);
-            break;
-        }
+        delete obj[i];
+        switch_build(i,value[0][i]);
+        build(i,0);
         if(i%10>=1&&p==i-1)//左邊
         {
             change(i,p);
@@ -1531,109 +1180,9 @@ void MainWindow::button_click(int p)
         else
         {
             value[1][p]=1;
-            switch(value[0][p])
-            {
-            case 0:
-                obj[p]->label->setPixmap(QPixmap(":/apple_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 1:
-                obj[p]->label->setPixmap(QPixmap(":/banana_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 2:
-                obj[p]->label->setPixmap(QPixmap(":/grape_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 3:
-                obj[p]->label->setPixmap(QPixmap(":/orange_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 4:
-                obj[p]->label->setPixmap(QPixmap(":/watermelon_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 10:
-                obj[p]->label->setPixmap(QPixmap(":/horizon_apple_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 11:
-                obj[p]->label->setPixmap(QPixmap(":/horizon_banana_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 12:
-                obj[p]->label->setPixmap(QPixmap(":/horizon_grape_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 13:
-                obj[p]->label->setPixmap(QPixmap(":/horizon_orange_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 14:
-                obj[p]->label->setPixmap(QPixmap(":/horizon_watermelon_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 20:
-                obj[p]->label->setPixmap(QPixmap(":/vertical_apple_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 21:
-                obj[p]->label->setPixmap(QPixmap(":/vertical_banana_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 22:
-                obj[p]->label->setPixmap(QPixmap(":/vertical_grape_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 23:
-                obj[p]->label->setPixmap(QPixmap(":/vertical_orange_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 24:
-                obj[p]->label->setPixmap(QPixmap(":/vertical_watermelon_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 30:
-                obj[p]->label->setPixmap(QPixmap(":/bomb_apple_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 31:
-                obj[p]->label->setPixmap(QPixmap(":/bomb_banana_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 32:
-                obj[p]->label->setPixmap(QPixmap(":/bomb_grape_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 33:
-                obj[p]->label->setPixmap(QPixmap(":/bomb_orange_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 34:
-                obj[p]->label->setPixmap(QPixmap(":/bomb_watermelon_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 40:
-                obj[p]->label->setPixmap(QPixmap(":/star_apple_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 41:
-                obj[p]->label->setPixmap(QPixmap(":/star_banana_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 42:
-                obj[p]->label->setPixmap(QPixmap(":/star_grape_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 43:
-                obj[p]->label->setPixmap(QPixmap(":/star_orange_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            case 44:
-                obj[p]->label->setPixmap(QPixmap(":/star_watermelon_pick.png"));
-                obj[p]->label->setScaledContents(true);
-                break;
-            }
+            delete obj[p];
+            switch_build(p,value[0][p]);
+            build(p,1);
         }
     }
     return;
@@ -1641,217 +1190,17 @@ void MainWindow::button_click(int p)
 
 void MainWindow::change(int p1,int p2)
 {
+    int temp=value[0][p2];
+    delete obj[p2];
+    switch_build(p2,value[0][p1]);
+    build(p2,0);
+    delete obj[p1];
+    switch_build(p1,temp);
+    build(p1,0);
+
     QPropertyAnimation *animation_0,*animation_1;
     animation_0=new QPropertyAnimation(obj[p1]->label,"geometry");
     animation_1=new QPropertyAnimation(obj[p2]->label,"geometry");
-
-    switch(value[0][p1])//用抓的
-    {
-    case 0:
-        obj[p2]->label->setPixmap(QPixmap(":/apple.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 1:
-        obj[p2]->label->setPixmap(QPixmap(":/banana.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 2:
-        obj[p2]->label->setPixmap(QPixmap(":/grape.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 3:
-        obj[p2]->label->setPixmap(QPixmap(":/orange.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 4:
-        obj[p2]->label->setPixmap(QPixmap(":/watermelon.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 10:
-        obj[p2]->label->setPixmap(QPixmap(":/horizon_apple.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 11:
-        obj[p2]->label->setPixmap(QPixmap(":/horizon_banana.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 12:
-        obj[p2]->label->setPixmap(QPixmap(":/horizon_grape.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 13:
-        obj[p2]->label->setPixmap(QPixmap(":/horizon_orange.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 14:
-        obj[p2]->label->setPixmap(QPixmap(":/horizon_watermelon.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 20:
-        obj[p2]->label->setPixmap(QPixmap(":/vertical_apple.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 21:
-        obj[p2]->label->setPixmap(QPixmap(":/vertical_banana.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 22:
-        obj[p2]->label->setPixmap(QPixmap(":/vertical_grape.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 23:
-        obj[p2]->label->setPixmap(QPixmap(":/vertical_orange.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 24:
-        obj[p2]->label->setPixmap(QPixmap(":/vertical_watermelon.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 30:
-        obj[p2]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 31:
-        obj[p2]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 32:
-        obj[p2]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 33:
-        obj[p2]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 34:
-        obj[p2]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 40:
-        obj[p2]->label->setPixmap(QPixmap(":/star_apple.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 41:
-        obj[p2]->label->setPixmap(QPixmap(":/star_banana.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 42:
-        obj[p2]->label->setPixmap(QPixmap(":/star_grape.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 43:
-        obj[p2]->label->setPixmap(QPixmap(":/star_orange.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    case 44:
-        obj[p2]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-        obj[p2]->label->setScaledContents(true);
-        break;
-    }
-    switch(value[0][p2])
-    {
-
-    case 0:
-        obj[p1]->label->setPixmap(QPixmap(":/apple.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 1:
-        obj[p1]->label->setPixmap(QPixmap(":/banana.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 2:
-        obj[p1]->label->setPixmap(QPixmap(":/grape.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 3:
-        obj[p1]->label->setPixmap(QPixmap(":/orange.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 4:
-        obj[p1]->label->setPixmap(QPixmap(":/watermelon.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 10:
-        obj[p1]->label->setPixmap(QPixmap(":/horizon_apple.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 11:
-        obj[p1]->label->setPixmap(QPixmap(":/horizon_banana.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 12:
-        obj[p1]->label->setPixmap(QPixmap(":/horizon_grape.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 13:
-        obj[p1]->label->setPixmap(QPixmap(":/horizon_orange.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 14:
-        obj[p1]->label->setPixmap(QPixmap(":/horizon_watermelon.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 20:
-        obj[p1]->label->setPixmap(QPixmap(":/vertical_apple.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 21:
-        obj[p1]->label->setPixmap(QPixmap(":/vertical_banana.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 22:
-        obj[p1]->label->setPixmap(QPixmap(":/vertical_grape.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 23:
-        obj[p1]->label->setPixmap(QPixmap(":/vertical_orange.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 24:
-        obj[p1]->label->setPixmap(QPixmap(":/vertical_watermelon.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 30:
-        obj[p1]->label->setPixmap(QPixmap(":/bomb_apple.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 31:
-        obj[p1]->label->setPixmap(QPixmap(":/bomb_banana.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 32:
-        obj[p1]->label->setPixmap(QPixmap(":/bomb_grape.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 33:
-        obj[p1]->label->setPixmap(QPixmap(":/bomb_orange.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 34:
-        obj[p1]->label->setPixmap(QPixmap(":/bomb_watermelon.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 40:
-        obj[p1]->label->setPixmap(QPixmap(":/star_apple.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 41:
-        obj[p1]->label->setPixmap(QPixmap(":/star_banana.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 42:
-        obj[p1]->label->setPixmap(QPixmap(":/star_grape.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 43:
-        obj[p1]->label->setPixmap(QPixmap(":/star_orange.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    case 44:
-        obj[p1]->label->setPixmap(QPixmap(":/star_watermelon.png"));
-        obj[p1]->label->setScaledContents(true);
-        break;
-    }
     animation_0->setDuration(500);//抓過來 位置從p2->p1
     animation_0->setStartValue(QRect(20+p2%10*52,570-p2/10*52,50,50));
     animation_0->setEndValue(QRect(20+p1%10*52,570-p1/10*52,50,50));
@@ -1859,37 +1208,34 @@ void MainWindow::change(int p1,int p2)
     animation_1->setStartValue(QRect(20+p1%10*52,570-p1/10*52,50,50));
     animation_1->setEndValue(QRect(20+p2%10*52,570-p2/10*52,50,50));
 
-
     QParallelAnimationGroup *group=new QParallelAnimationGroup;
     group->addAnimation(animation_0);
     group->addAnimation(animation_1);
     group->start();
     elapse(500);
-    int l=value[0][p1];
-    int k=obj[p1]->type;
-    value[0][p1]=value[0][p2];
-    obj[p1]->type=obj[p2]->type;
-    value[0][p2]=l;
-    obj[p2]->type=k;
-
     judge(p1,p2);
-
-
 }
+
 void MainWindow::star_eliminate(int p,int loop)
 {
-    int star=value[0][p]%10;
-    value[0][p]=-1;
-    obj[p]->label->setPixmap(QPixmap(":/base.png"));
-    obj[p]->type=-1;
     for(int i=0;i<100;i++)
-        if(value[0][i]==star)
+        obj[i]->button->setEnabled(false);
+    int star=value[0][p]%10;
+    delete obj[p];
+    switch_build(p,-1);
+    build(p,0);
+    your_score+=10;
+    Count_score->display(QString::number(your_score));
+    for(int i=0;i<100;i++)
+        if(value[0][i]%10==star)
         {
-            obj[i]->label->setPixmap(QPixmap(":/base.png"));
-            obj[i]->label->setScaledContents(true);
+            int temp=value[0][i];
+            delete obj[i];
+            switch_build(i,-1);
+            build(i,0);
             if(value[0][i]>=10)
             {
-                switch(value[0][i]/10)
+                switch(temp/10)
                 {
                 case 1:
                     horizon_eliminate(i,1);
@@ -1905,26 +1251,45 @@ void MainWindow::star_eliminate(int p,int loop)
                     break;
                 }
             }
-            value[0][i]=-1;
-            obj[i]->type=-1;
+            your_score+=10;
+            Count_score->display(QString::number(your_score));
         }
     if(loop==0)
         random_generate();
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(true);
 }
+
 void MainWindow::bomb_eliminate(int p,int loop)
 {
-    obj[p]->label->setPixmap(QPixmap(":/base.png"));
-    obj[p]->label->setScaledContents(true);
-    value[0][p]=-1;
-    obj[p]->type=-1;
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(false);
+    delete obj[p];
+    switch_build(p,-1);
+    build(p,0);
+    your_score+=10;
+    Count_score->display(QString::number(your_score));
     for(int i=p-11;i<=p+11;i++)
     {
         if(i==p)
             continue;
-        if(i%10<1||i%10>8||i/10>8||i/10<1)
+        if(i<0)
             continue;
-        obj[i]->label->setPixmap(QPixmap(":/base.png"));
-        obj[i]->label->setScaledContents(true);
+        if(p%10==0)
+            if(i==p-11||i==p-1||i==p+9)
+                continue;
+        if(p%10==9)
+            if(i==p-9||i==p+1||i==p+11)
+                continue;
+        if(p/10==9)
+            if(i==p+9||i==p+10||i==p+11)
+                continue;
+        if(p/10==0)
+            if(i==p-11||i==p-10||i==p-9)
+                continue;
+        delete obj[i];
+        switch_build(i,-1);
+        build(i,0);
         elapse(50);
        /* if(value[0][i]>=10)
         {
@@ -1944,30 +1309,38 @@ void MainWindow::bomb_eliminate(int p,int loop)
                 break;
             }
         }*/
-        value[0][i]=-1;
-        obj[i]->type=-1;
+        your_score+=10;
+        Count_score->display(QString::number(your_score));
         if(i==p-9||i==p+1)
             i+=7;
     }
 
     if(loop==0)
         random_generate();
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(true);
 }
+
 void MainWindow::vertical_eliminate(int p,int loop)
 {
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(false);
     for(int i=p%10;i<100;i+=10)
     {
-        obj[i]->label->setPixmap(QPixmap(":/base.png"));
-        obj[i]->label->setScaledContents(true);
+        int temp=value[0][i];
+        delete obj[i];
+        switch_build(i,-1);
+        build(i,0);
+        elapse(50);
         if(i==p)
         {
-            value[0][i]=-1;
-            obj[i]->type=-1;
+            your_score+=10;
+            Count_score->display(QString::number(your_score));
             continue;
         }
-        if(value[0][i]>=10)
+        if(temp>=10)
         {
-            switch(value[0][i]/10)
+            switch(temp/10)
             {
             case 1:
                 horizon_eliminate(i,1);
@@ -1983,27 +1356,35 @@ void MainWindow::vertical_eliminate(int p,int loop)
                 break;
             }
         }
-        value[0][i]=-1;
-        obj[i]->type=-1;
+        your_score+=10;
+        Count_score->display(QString::number(your_score));
     }
     if(loop==0)
         random_generate();
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(true);
 }
+
 void MainWindow::horizon_eliminate(int p,int loop)
 {
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(false);
     for(int i=p/10*10;i<p/10*10+10;i++)
     {
-        obj[i]->label->setPixmap(QPixmap(":/base.png"));
-        obj[i]->label->setScaledContents(true);
+        int temp=value[0][i];
+        delete obj[i];
+        switch_build(i,-1);
+        build(i,0);
+        elapse(50);
         if(i==p)
         {
-            value[0][i]=-1;
-            obj[i]->type=-1;
+            your_score+=10;
+            Count_score->display(QString::number(your_score));
             continue;
         }
-        if(value[0][i]>=10)
+        if(temp>=10)
         {
-            switch(value[0][i]/10)
+            switch(temp/10)
             {
             case 1:
                 horizon_eliminate(i,1);
@@ -2019,11 +1400,13 @@ void MainWindow::horizon_eliminate(int p,int loop)
                 break;
             }
         }
-        value[0][i]=-1;
-        obj[i]->type=-1;
+        your_score+=10;
+        Count_score->display(QString::number(your_score));
     }
     if(loop==0)
         random_generate();
+    for(int i=0;i<100;i++)
+        obj[i]->button->setEnabled(true);
 }
 
 void MainWindow::random_generate()
@@ -2158,7 +1541,6 @@ void MainWindow::random_generate()
                         animation[i+j*10]->setStartValue(QRect(20+k%10*52,570-k/10*52,50,50));
                         animation[i+j*10]->setEndValue(QRect(20+(i+j*10)%10*52,570-(i+j*10)/10*52,50,50));
                         group->addAnimation(animation[i+j*10]);
-
                         break;
                     }
                 }
@@ -2169,35 +1551,9 @@ void MainWindow::random_generate()
                     {
 
                         value[0][k]=rand()%5;
-
-                        switch(value[0][k])
-                        {
-                        case 0:
-                            obj[k]->label->setPixmap(QPixmap(":/apple.png"));
-                            obj[k]->label->setScaledContents(true);
-                            obj[k]->type=0;
-                            break;
-                        case 1:
-                            obj[k]->label->setPixmap(QPixmap(":/banana.png"));
-                            obj[k]->label->setScaledContents(true);
-                            obj[k]->type=1;
-                            break;
-                        case 2:
-                            obj[k]->label->setPixmap(QPixmap(":/grape.png"));
-                            obj[k]->label->setScaledContents(true);
-                            obj[k]->type=2;
-                            break;
-                        case 3:
-                            obj[k]->label->setPixmap(QPixmap(":/orange.png"));
-                            obj[k]->label->setScaledContents(true);
-                            obj[k]->type=3;
-                            break;
-                        case 4:
-                            obj[k]->label->setPixmap(QPixmap(":/watermelon.png"));
-                            obj[k]->label->setScaledContents(true);
-                            obj[k]->type=4;
-                            break;
-                        }
+                        delete obj[k];
+                        switch_build(k,value[0][k]);
+                        build(k,0);
                         animation[100+k]=new QPropertyAnimation(obj[k]->label,"geometry");
                         animation[100+k]->setDuration(500);
                         animation[100+k]->setStartValue(QRect(20+k%10*52,108-k/10*52,50,50));
@@ -2208,5 +1564,93 @@ void MainWindow::random_generate()
             }
         }
     group->start();
-    elapse(1000);
+    elapse(700);
+}
+
+void MainWindow::time_out()
+{
+    for(int i=0;i<100;i++)
+        obj[i]->button->hide();
+    end_game=new QDialog;
+    end_game->setFixedSize(500,500);
+    QPushButton *restart=new QPushButton;
+    restart->setParent(end_game);
+    restart->setGeometry(30,400,200,50);
+    restart->setText("Restart");
+    connect(restart,SIGNAL(clicked()),this,SLOT(restart_game()));
+    QPushButton *end_program=new QPushButton;
+    end_program->setParent(end_game);
+    end_program->setGeometry(270,400,200,50);
+    end_program->setText("End");
+    connect(end_program,SIGNAL(clicked()),this,SLOT(close_game()));
+    score=your_score;
+    QFont f;
+    f.setFamily("French Script MT");
+    f.setPointSize(40);
+    QLabel *stars=new QLabel;
+    QLabel *comment=new QLabel;
+    if(your_score>=10000)
+    {
+        star=3;
+        stars->setPixmap(QPixmap(":/star3.png"));
+        stars->setScaledContents(true);
+        comment->setText("<h2><center><font color=red>Excellent!!!</font></center></h2>");
+    }
+    else if(your_score>=5000)
+    {
+        star=2;
+        stars->setPixmap(QPixmap(":/star2.png"));
+        stars->setScaledContents(true);
+        comment->setText("<h2><center><font color=red>Great!!</font></center></h2>");
+    }
+    else if(your_score>=1000)
+    {
+        star=1;
+        stars->setPixmap(QPixmap(":/star1.png"));
+        stars->setScaledContents(true);
+        comment->setText("<h2><center><font color=red>Good!</font></center></h2>");
+    }
+    else
+    {
+        star=0;
+        stars->setPixmap(QPixmap(":/star0.png"));
+        stars->setScaledContents(true);
+        comment->setText("<h2><center><font color=red>Keep going</font></center></h2>");
+    }
+    stars->setParent(end_game);
+    stars->setGeometry(50,50,420,200);
+    comment->setParent(end_game);
+    comment->setGeometry(50,200,420,200);
+    comment->setFont(f);
+    while(obj[0]->button->isEnabled());
+    end_game->show();
+}
+
+void MainWindow::restart_game()
+{
+    end_game->close();
+    for(int i=0;i<100;i++)
+        obj[i]->label->setPixmap(QPixmap(":/base.png"));
+    your_score=0;
+    Count_score->display(QString::number(your_score));
+    generate_first_board();
+    time_limit=120;
+    timer=new QTimer(this);
+    connect(timer,SIGNAL(timeout()),this,SLOT(count_time()));
+    timer->start(1000);
+}
+
+void MainWindow::close_game()
+{
+    QMediaPlayer *warning=new QMediaPlayer;
+    warning->setMedia(QUrl("qrc:/warning.mp3"));
+    warning->play();
+    QMessageBox message(QMessageBox::NoIcon,"Quit","<h2>Are you sure you want to quit?</h2>",QMessageBox::Yes | QMessageBox::No);
+    message.setIconPixmap(QPixmap(":/warning.jpg"));
+    if(message.exec() == QMessageBox::Yes)
+    {
+        end_game->close();
+        emit quit(star,score);
+        this->close();
+    }
 }

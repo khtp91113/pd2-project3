@@ -7,13 +7,19 @@ banana_horizon::banana_horizon(QWidget *parent):object(parent)
 
 banana_horizon::~banana_horizon()
 {
-
+    delete label;
+    delete button;
 }
 
-void banana_horizon::paint()
+void banana_horizon::paint(int type)
 {
-    label->setPixmap(QPixmap(":/banana_horizon.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/horizon_banana.png"));
+    else
+        label->setPixmap(QPixmap(":/horizon_banana_pick.png"));
     label->setScaledContents(true);
+    label->setFixedSize(50,50);
+    button->setFixedSize(50,50);
     button->setFlat(true);
     button->setStyleSheet("background:transparent");
     button->raise();

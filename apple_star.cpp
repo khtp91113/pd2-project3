@@ -7,12 +7,16 @@ apple_star::apple_star(QWidget *parent):object(parent)
 
 apple_star::~apple_star()
 {
-
+    delete label;
+    delete button;
 }
 
-void apple_star::paint()
+void apple_star::paint(int type)
 {
-    label->setPixmap(QPixmap(":/star_apple.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/star_apple.png"));
+    else
+        label->setPixmap(QPixmap(":/star_apple_pick.png"));
     label->setScaledContents(true);
     label->setFixedSize(50,50);
     button->setFixedSize(50,50);

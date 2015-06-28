@@ -11,7 +11,7 @@ class watermelon_horizon:public object
 public:
     watermelon_horizon(QWidget *parent);
     ~watermelon_horizon();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // WATERMELON_HORIZON_H

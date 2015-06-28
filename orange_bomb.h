@@ -11,7 +11,7 @@ class orange_bomb:public object
 public:
     orange_bomb(QWidget *parent);
     ~orange_bomb();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // ORANGE_BOMB_H

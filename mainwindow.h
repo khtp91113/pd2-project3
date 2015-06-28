@@ -44,6 +44,10 @@
 #include <QTime>
 #include <QCoreApplication>
 #include <QSignalMapper>
+#include <QLCDNumber>
+#include <QtCore>
+#include <QDateTime>
+#include <QDialog>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -63,11 +67,19 @@ public:
     void bomb_eliminate(int p,int loop);
     void star_eliminate(int p,int loop);
     void random_generate();
+    void time_out();
+    void build(int i,int paint_type);
+    void switch_build(int i,int value_change);
+signals:
+    void quit(int star,int score);
 
 public slots:
     void game();
     void button_end();
     void button_click(int i);
+    void count_time();
+    void restart_game();
+    void close_game();
 private:
     QImage image;
     QWidget *w;
@@ -76,6 +88,13 @@ private:
     int value[2][100];
     QLabel *Time,*Score;
     QSignalMapper *signal;
+    QLCDNumber *Count_down;
+    QLCDNumber *Count_score;
+    QTimer *timer;
+    int time_limit;
+    QDialog *end_game;
+    int your_score;
+    int star,score;
 };
 
 #endif // MAINWINDOW_H

@@ -11,7 +11,7 @@ class banana_horizon:public object
 public:
     banana_horizon(QWidget *parent);
     ~banana_horizon();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // BANANA_HORIZON_H

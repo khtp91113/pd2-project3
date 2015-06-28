@@ -6,12 +6,16 @@ apple::apple(QWidget *parent):object(parent)
 }
 apple::~apple()
 {
-
+    delete label;
+    delete button;
 }
 
-void apple::paint()
+void apple::paint(int type)
 {
-    label->setPixmap(QPixmap(":/apple.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/apple.png"));
+    else
+        label->setPixmap(QPixmap(":/apple_pick.png"));
     label->setScaledContents(true);
     label->setFixedSize(50,50);
     button->setFixedSize(50,50);

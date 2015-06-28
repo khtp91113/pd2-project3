@@ -7,13 +7,19 @@ banana_star::banana_star(QWidget *parent):object(parent)
 
 banana_star::~banana_star()
 {
-
+    delete label;
+    delete button;
 }
 
-void banana_star::paint()
+void banana_star::paint(int type)
 {
-    label->setPixmap(QPixmap(":/star_banana.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/star_banana.png"));
+    else
+        label->setPixmap(QPixmap(":/star_banana_pick.png"));
     label->setScaledContents(true);
+    label->setFixedSize(50,50);
+    button->setFixedSize(50,50);
     button->setFlat(true);
     button->setStyleSheet("background:transparent");
     button->raise();

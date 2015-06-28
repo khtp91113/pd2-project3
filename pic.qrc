@@ -56,5 +56,9 @@
         <file>base.png</file>
         <file>apple_pick.png</file>
         <file>banana_pick.png</file>
+        <file>star0.png</file>
+        <file>star1.png</file>
+        <file>star2.png</file>
+        <file>star3.png</file>
     </qresource>
 </RCC>

@@ -11,7 +11,7 @@ class banana_star:public object
 public:
     banana_star(QWidget *parent);
     ~banana_star();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // BANANA_STAR_H

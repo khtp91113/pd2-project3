@@ -11,7 +11,7 @@ class apple:public object
 public:
     apple(QWidget *parent);
     ~apple();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // APPLE

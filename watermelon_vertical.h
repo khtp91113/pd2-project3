@@ -11,7 +11,7 @@ class watermelon_vertical:public object
 public:
     watermelon_vertical(QWidget *parent);
     ~watermelon_vertical();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // WATERMELON_VERTICAL_H

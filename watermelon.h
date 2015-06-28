@@ -10,7 +10,7 @@ class watermelon:public object
 public:
     watermelon(QWidget *parent);
     ~watermelon();
-    virtual void paint();
+    virtual void paint(int type);
 
 };
 #endif // WATERMELON

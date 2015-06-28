@@ -10,8 +10,8 @@ class apple_bomb:public object
     Q_OBJECT
 public:
     apple_bomb(QWidget *parent);
-    ~apple_bomb();
-    virtual void paint();
+    virtual ~apple_bomb();
+    virtual void paint(int type);
 };
 
 #endif // APPLE_BOMB_H

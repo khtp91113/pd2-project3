@@ -7,13 +7,19 @@ grape::grape(QWidget *parent):object(parent)
 }
 grape::~grape()
 {
-
+    delete label;
+    delete button;
 }
 
-void grape::paint()
+void grape::paint(int type)
 {
-    label->setPixmap(QPixmap(":/grape.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/grape.png"));
+    else
+        label->setPixmap(QPixmap(":/grape_pick.png"));
     label->setScaledContents(true);
+    label->setFixedSize(50,50);
+    button->setFixedSize(50,50);
     button->setFlat(true);
     button->setStyleSheet("background:transparent");
     button->raise();

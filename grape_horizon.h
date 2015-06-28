@@ -11,7 +11,7 @@ class grape_horizon:public object
 public:
     grape_horizon(QWidget *parent);
     ~grape_horizon();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // GRAPE_HORIZON_H

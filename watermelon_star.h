@@ -11,7 +11,7 @@ class watermelon_star:public object
 public:
     watermelon_star(QWidget *parent);
     ~watermelon_star();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // WATERMELON_STAR_H

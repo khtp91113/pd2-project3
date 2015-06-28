@@ -11,7 +11,7 @@ class watermelon_bomb:public object
 public:
     watermelon_bomb(QWidget *parent);
     ~watermelon_bomb();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // WATERMELON_BOMB_H

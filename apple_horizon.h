@@ -10,8 +10,8 @@ class apple_horizon:public object
     Q_OBJECT
 public:
     apple_horizon(QWidget *parent);
-    ~apple_horizon();
-    virtual void paint();
+    virtual ~apple_horizon();
+    virtual void paint(int type);
 };
 
 #endif // APPLE_HORIZON_H

@@ -2,17 +2,21 @@
 
 apple_vertical::apple_vertical(QWidget *parent):object(parent)
 {
-    type=10;
+    type=20;
 }
 
 apple_vertical::~apple_vertical()
 {
-
+    delete label;
+    delete button;
 }
 
-void apple_vertical::paint()
+void apple_vertical::paint(int type)
 {
-    label->setPixmap(QPixmap(":/apple_vertical.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/vertical_apple.png"));
+    else
+        label->setPixmap(QPixmap(":/vertical_apple_pick.png"));
     label->setScaledContents(true);
     label->setFixedSize(50,50);
     button->setFixedSize(50,50);

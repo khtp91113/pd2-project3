@@ -11,7 +11,7 @@ class grape_vertical:public object
 public:
     grape_vertical(QWidget *parent);
     ~grape_vertical();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // GRAPE_VERTICAL_H

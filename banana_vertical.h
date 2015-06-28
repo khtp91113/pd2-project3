@@ -11,7 +11,7 @@ class banana_vertical:public object
 public:
     banana_vertical(QWidget *parent);
     ~banana_vertical();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // BANANA_VERTICAL_H

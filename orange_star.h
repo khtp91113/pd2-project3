@@ -11,7 +11,7 @@ class orange_star:public object
 public:
     orange_star(QWidget *parent);
     ~orange_star();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // ORANGE_STAR_H

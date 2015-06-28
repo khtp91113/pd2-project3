@@ -12,7 +12,7 @@ class object:public QWidget
 public:
     object(QWidget *parent=0);
     ~object();
-    virtual void paint()=0;
+    virtual void paint(int type)=0;
     QLabel *label;
     QPushButton *button;
     QWidget *w;

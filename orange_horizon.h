@@ -11,7 +11,7 @@ class orange_horizon:public object
 public:
     orange_horizon(QWidget *parent);
     ~orange_horizon();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // ORANGE_HORIZON_H

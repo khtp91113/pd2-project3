@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[6];
-    char stringdata[43];
+    QByteArrayData data[12];
+    char stringdata[94];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -30,15 +30,22 @@ struct qt_meta_stringdata_MainWindow_t {
 static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_MainWindow = {
     {
 QT_MOC_LITERAL(0, 0, 10), // "MainWindow"
-QT_MOC_LITERAL(1, 11, 4), // "game"
+QT_MOC_LITERAL(1, 11, 4), // "quit"
 QT_MOC_LITERAL(2, 16, 0), // ""
-QT_MOC_LITERAL(3, 17, 10), // "button_end"
-QT_MOC_LITERAL(4, 28, 12), // "button_click"
-QT_MOC_LITERAL(5, 41, 1) // "i"
+QT_MOC_LITERAL(3, 17, 4), // "star"
+QT_MOC_LITERAL(4, 22, 5), // "score"
+QT_MOC_LITERAL(5, 28, 4), // "game"
+QT_MOC_LITERAL(6, 33, 10), // "button_end"
+QT_MOC_LITERAL(7, 44, 12), // "button_click"
+QT_MOC_LITERAL(8, 57, 1), // "i"
+QT_MOC_LITERAL(9, 59, 10), // "count_time"
+QT_MOC_LITERAL(10, 70, 12), // "restart_game"
+QT_MOC_LITERAL(11, 83, 10) // "close_game"
 
     },
-    "MainWindow\0game\0\0button_end\0button_click\0"
-    "i"
+    "MainWindow\0quit\0\0star\0score\0game\0"
+    "button_end\0button_click\0i\0count_time\0"
+    "restart_game\0close_game"
 };
 #undef QT_MOC_LITERAL
 
@@ -48,22 +55,34 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       0,       // signalCount
+       1,       // signalCount
+
+ // signals: name, argc, parameters, tag, flags
+       1,    2,   49,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   29,    2, 0x0a /* Public */,
-       3,    0,   30,    2, 0x0a /* Public */,
-       4,    1,   31,    2, 0x0a /* Public */,
+       5,    0,   54,    2, 0x0a /* Public */,
+       6,    0,   55,    2, 0x0a /* Public */,
+       7,    1,   56,    2, 0x0a /* Public */,
+       9,    0,   59,    2, 0x0a /* Public */,
+      10,    0,   60,    2, 0x0a /* Public */,
+      11,    0,   61,    2, 0x0a /* Public */,
+
+ // signals: parameters
+    QMetaType::Void, QMetaType::Int, QMetaType::Int,    3,    4,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,    5,
+    QMetaType::Void, QMetaType::Int,    8,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -73,10 +92,23 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     if (_c == QMetaObject::InvokeMetaMethod) {
         MainWindow *_t = static_cast<MainWindow *>(_o);
         switch (_id) {
-        case 0: _t->game(); break;
-        case 1: _t->button_end(); break;
-        case 2: _t->button_click((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 0: _t->quit((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 1: _t->game(); break;
+        case 2: _t->button_end(); break;
+        case 3: _t->button_click((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 4: _t->count_time(); break;
+        case 5: _t->restart_game(); break;
+        case 6: _t->close_game(); break;
         default: ;
+        }
+    } else if (_c == QMetaObject::IndexOfMethod) {
+        int *result = reinterpret_cast<int *>(_a[0]);
+        void **func = reinterpret_cast<void **>(_a[1]);
+        {
+            typedef void (MainWindow::*_t)(int , int );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::quit)) {
+                *result = 0;
+            }
         }
     }
 }
@@ -106,14 +138,21 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 7;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 7)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 3;
+        _id -= 7;
     }
     return _id;
+}
+
+// SIGNAL 0
+void MainWindow::quit(int _t1, int _t2)
+{
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_END_MOC_NAMESPACE

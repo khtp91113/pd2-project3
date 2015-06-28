@@ -11,7 +11,7 @@ class orange_vertical:public object
 public:
     orange_vertical(QWidget *parent);
     ~orange_vertical();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // ORANGE_VERTICAL_H

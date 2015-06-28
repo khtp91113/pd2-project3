@@ -2,7 +2,6 @@
 #include"QDebug"
 object::object(QWidget *parent):w(parent)
 {
-    type=-1;
     label=new QLabel;
     button=new QPushButton;
     label->setParent(parent);
@@ -11,8 +10,8 @@ object::object(QWidget *parent):w(parent)
 
 object::~object()
 {
-    delete label;
-    delete button;
+    /*delete button;
+    delete label;*/
 }
 
 bool object::operator==(const object&right)const

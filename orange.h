@@ -10,7 +10,7 @@ class orange:public object
 public:
     orange(QWidget *parent);
     ~orange();
-    virtual void paint();
+    virtual void paint(int type);
 
 };
 #endif // ORANGE

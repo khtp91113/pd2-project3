@@ -7,12 +7,16 @@ apple_bomb::apple_bomb(QWidget *parent):object(parent)
 
 apple_bomb::~apple_bomb()
 {
-
+    delete label;
+    delete button;
 }
 
-void apple_bomb::paint()
+void apple_bomb::paint(int type)
 {
-    label->setPixmap(QPixmap(":/bomb_apple.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/bomb_apple.png"));
+    else
+        label->setPixmap(QPixmap(":/bomb_apple_pick.png"));
     label->setScaledContents(true);
     label->setFixedSize(50,50);
     button->setFixedSize(50,50);

@@ -10,8 +10,8 @@ class apple_star:public object
     Q_OBJECT
 public:
     apple_star(QWidget *parent);
-    ~apple_star();
-    virtual void paint();
+    virtual ~apple_star();
+    virtual void paint(int type);
 };
 
 #endif // APPLE_STAR_H

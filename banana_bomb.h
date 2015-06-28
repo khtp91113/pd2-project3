@@ -10,8 +10,8 @@ class banana_bomb:public object
     Q_OBJECT
 public:
     banana_bomb(QWidget *parent);
-    ~banana_bomb();
-    virtual void paint();
+    virtual ~banana_bomb();
+    virtual void paint(int type);
 };
 
 #endif // BANANA_BOMB_H

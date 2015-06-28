@@ -9,8 +9,8 @@ class banana:public object
     Q_OBJECT
 public:
     banana(QWidget *parent);
-    ~banana();
-    virtual void paint();
+    virtual ~banana();
+    virtual void paint(int type);
 
 };
 #endif // BANANA

@@ -11,7 +11,7 @@ class grape_star:public object
 public:
     grape_star(QWidget *parent);
     ~grape_star();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // GRAPE_STAR_H

@@ -11,7 +11,7 @@ class grape_bomb:public object
 public:
     grape_bomb(QWidget *parent);
     ~grape_bomb();
-    virtual void paint();
+    virtual void paint(int type);
 };
 
 #endif // GRAPE_BOMB_H

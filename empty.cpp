@@ -2,13 +2,15 @@
 #include "QDebug"
 empty::empty(QWidget *parent):object(parent)
 {
+    type=-1;
 }
 empty::~empty()
 {
-
+    delete label;
+    delete button;
 }
 
-void empty::paint()
+void empty::paint(int type)
 {
     label->setPixmap(QPixmap(":/base.png"));
     label->setScaledContents(true);

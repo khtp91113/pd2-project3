@@ -7,13 +7,19 @@ orange_vertical::orange_vertical(QWidget *parent):object(parent)
 
 orange_vertical::~orange_vertical()
 {
-
+    delete label;
+    delete button;
 }
 
-void orange_vertical::paint()
+void orange_vertical::paint(int type)
 {
-    label->setPixmap(QPixmap(":/orange_vertical.png"));
+    if(type==0)
+        label->setPixmap(QPixmap(":/vertical_orange.png"));
+    else
+        label->setPixmap(QPixmap(":/vertical_orange_pick.png"));
     label->setScaledContents(true);
+    label->setFixedSize(50,50);
+    button->setFixedSize(50,50);
     button->setFlat(true);
     button->setStyleSheet("background:transparent");
     button->raise();

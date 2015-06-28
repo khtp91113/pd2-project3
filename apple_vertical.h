@@ -10,8 +10,8 @@ class apple_vertical:public object
     Q_OBJECT
 public:
     apple_vertical(QWidget *parent);
-    ~apple_vertical();
-    virtual void paint();
+    virtual ~apple_vertical();
+    virtual void paint(int type);
 };
 
 #endif // APPLE_VERTICAL_H

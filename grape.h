@@ -10,7 +10,7 @@ class grape:public object
 public:
     grape(QWidget *parent);
     ~grape();
-    virtual void paint();
+    virtual void paint(int type);
 
 };
 #endif // GRAPE
